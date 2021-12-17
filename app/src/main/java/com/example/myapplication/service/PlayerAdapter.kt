@@ -31,7 +31,7 @@ abstract class PlayerAdapter(private val mApplicationContext: Context) {
     private var mPlayOnAudioFocus = false
 
     abstract fun playFromMedia(metadata: MediaMetadataCompat?)
-    abstract fun getCurrentMedia(): MediaMetadataCompat
+    abstract fun getCurrentMedia(): MediaMetadataCompat?
     abstract fun isPlaying(): Boolean
 
     fun play() {

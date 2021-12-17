@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull
 class MediaNotificationManager(private val service: MusicService) {
     companion object{
         val NOTIFICATION_ID = 412
-        val TAG = this.javaClass.simpleName
+        val TAG = "jms8732"
         val CHANNEL_ID = "com.example.android.musicplayer.channel"
         val REQUEST_CODE = 501
     }

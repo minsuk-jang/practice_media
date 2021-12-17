@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadata
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
+import com.example.myapplication.BuildConfig
+import com.example.myapplication.R
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -19,6 +21,33 @@ object MusicLibrary {
 
     val root = "root"
 
+    init {
+        createMediaMetadataCompat(
+            "Jazz_In_Paris",
+            "Jazz in Paris",
+            "Media Right Productions",
+            "Jazz & Blues",
+            "Jazz",
+            103,
+            TimeUnit.SECONDS,
+            "jazz_in_paris.mp3",
+            R.drawable.album_jazz_blues,
+            "album_jazz_blues"
+        )
+        createMediaMetadataCompat(
+            "The_Coldest_Shoulder",
+            "The Coldest Shoulder",
+            "The 126ers",
+            "Youtube Audio Library Rock 2",
+            "Rock",
+            160,
+            TimeUnit.SECONDS,
+            "the_coldest_shoulder.mp3",
+            R.drawable.album_youtube_audio_library_rock_2,
+            "album_youtube_audio_library_rock_2"
+        )
+    }
+
     fun getAlbumUri(albumArtResName: String): String {
         return ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + BuildConfig.APPLICATION_ID + "/drawable/" + albumArtResName
     }
@@ -27,12 +56,12 @@ object MusicLibrary {
         return musicFileName[mediaId]
     }
 
-    fun getAlbumRes(mediaId: String): Int? {
-        return albumRes[mediaId]
+    fun getAlbumRes(mediaId: String): Int {
+        return albumRes[mediaId]!!
     }
 
     fun getAlbumBitmap(context: Context, mediaId: String): Bitmap {
-        return BitmapFactory.decodeResource(context.resources, getAlbumRes(mediaId) ?: 0)
+        return BitmapFactory.decodeResource(context.resources, getAlbumRes(mediaId))
     }
 
     fun getMediaItems(): List<MediaBrowserCompat.MediaItem> {
