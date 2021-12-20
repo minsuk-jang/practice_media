@@ -6,6 +6,7 @@ import android.media.session.PlaybackState
 import android.os.SystemClock
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import com.example.myapplication.service.PlaybackInfoListener
 import com.example.myapplication.service.PlayerAdapter
 import com.example.myapplication.service.contentcatalogs.MusicLibrary
@@ -27,7 +28,6 @@ class MediaPlayerAdapter(private val context: Context, private val listener: Pla
             mMediaPlayer = MediaPlayer().apply {
                 setOnCompletionListener {
                     listener.onPlaybackCompleted()
-
                     setNewState(PlaybackStateCompat.STATE_PAUSED)
                 }
             }
@@ -36,8 +36,8 @@ class MediaPlayerAdapter(private val context: Context, private val listener: Pla
 
     override fun playFromMedia(metadata: MediaMetadataCompat?) {
         mCurrentMedia = metadata
-
         val mediaId = metadata?.description?.mediaId!!
+
         playFile(MusicLibrary.getMusicFileName(mediaId)!!)
     }
 
@@ -141,14 +141,15 @@ class MediaPlayerAdapter(private val context: Context, private val listener: Pla
         listener.onPlaybackStateChange(builder.build())
     }
 
-    private fun getAvailableActions() : Long{
-        var actions = PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
+    private fun getAvailableActions(): Long {
+        var actions =
+            PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID or PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH or PlaybackStateCompat.ACTION_SKIP_TO_NEXT or PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
 
-        actions = when(mState){
+        actions = when (mState) {
             PlaybackStateCompat.STATE_STOPPED -> actions or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PAUSE
             PlaybackStateCompat.STATE_PLAYING -> actions or PlaybackStateCompat.ACTION_STOP or PlaybackStateCompat.ACTION_PAUSE or PlaybackStateCompat.ACTION_SEEK_TO
-            PlaybackStateCompat.STATE_PAUSED -> actions or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_STOP
-            else -> actions or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_STOP or PlaybackStateCompat.ACTION_PAUSE
+            PlaybackStateCompat.STATE_PAUSED  -> actions or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_STOP
+            else                              -> actions or PlaybackStateCompat.ACTION_PLAY or PlaybackStateCompat.ACTION_PLAY_PAUSE or PlaybackStateCompat.ACTION_STOP or PlaybackStateCompat.ACTION_PAUSE
         }
 
         return actions
@@ -156,7 +157,7 @@ class MediaPlayerAdapter(private val context: Context, private val listener: Pla
 
     override fun seekTo(position: Long) {
         mMediaPlayer?.run {
-            if(!isPlaying){
+            if (!isPlaying) {
                 mSeekWhileNotPlaying = position.toInt()
             }
             this.seekTo(position.toInt())
@@ -167,7 +168,7 @@ class MediaPlayerAdapter(private val context: Context, private val listener: Pla
 
     override fun setVolume(volume: Float) {
         mMediaPlayer?.run {
-            setVolume(volume,volume)
+            setVolume(volume, volume)
         }
     }
 }

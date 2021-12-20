@@ -13,8 +13,8 @@ import androidx.appcompat.widget.AppCompatSeekBar
 
 class MediaSeekBar @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null,
-    defStyle: Int = 0
+    attrs: AttributeSet,
+    defStyle: Int
 ) : AppCompatSeekBar(context, attrs, defStyle) {
     private var mMediaController : MediaControllerCompat? = null
     private var mControllerCallback : ControllerCallback? =null
@@ -45,7 +45,7 @@ class MediaSeekBar @JvmOverloads constructor(
         throw UnsupportedOperationException("Cannot add listeners to a MediaSeekBar")
     }
 
-    fun setMediaController(mediaController : MediaControllerCompat){
+    fun setMediaController(mediaController : MediaControllerCompat?){
         if(mediaController != null){
             mControllerCallback = ControllerCallback()
             mediaController.registerCallback(mControllerCallback!!)

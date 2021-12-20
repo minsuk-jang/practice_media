@@ -89,6 +89,10 @@ class MusicService : MediaBrowserServiceCompat() {
             }
         }
 
+        override fun onPause() {
+            mPlayback.pause()
+        }
+
         override fun onPlay() {
             if (!isReadyToPlay()) return
 

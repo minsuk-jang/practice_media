@@ -7,6 +7,7 @@ import android.os.RemoteException
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaControllerCompat.Callback
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
@@ -18,7 +19,7 @@ open class MediaBrowserHelper(
     private val serviceClass: Class<out MediaBrowserServiceCompat>
 ) {
     private val TAG = "jms8732"
-    private val mCallbackList: ArrayList<MediaControllerCompat.Callback> = ArrayList()
+    private val mCallbackList: ArrayList<Callback?> = ArrayList()
     private val mMediaBrowserConnectionCallback = MediaBrowserConnectionCallback()
     private val mMediaControllerCallback = MediaControllerCallback()
     private val mMediaBrowserSubscriptionCallback = MediaBrowserSubscriptionCallback()
@@ -68,7 +69,7 @@ open class MediaBrowserHelper(
 
     private fun resetState() {
         performOnAllCallbacks(object : CallbackCommand {
-            override fun perform(callback: MediaControllerCompat.Callback) {
+            override fun perform(callback: Callback) {
                 callback.onPlaybackStateChanged(null)
             }
         })
@@ -78,10 +79,15 @@ open class MediaBrowserHelper(
 
     private fun performOnAllCallbacks(command: CallbackCommand) {
         mCallbackList.forEach {
-            command.perform(it)
+            if (it != null)
+                command.perform(it)
         }
     }
 
+    /**
+     * TransportControls 인터페이스
+     * 세션의 playback을 control 할 수 있다.
+     */
     fun getTransportControls(): MediaControllerCompat.TransportControls {
         if (mMediaController == null) {
             Log.d(TAG, "getTransportControls: MediaController is null!")
@@ -91,7 +97,7 @@ open class MediaBrowserHelper(
         return mMediaController?.transportControls!!
     }
 
-    fun registerCallback(callback: MediaControllerCompat.Callback) {
+    fun registerCallback(callback: Callback) {
         if (callback != null) {
             mCallbackList.add(callback)
 
@@ -110,14 +116,14 @@ open class MediaBrowserHelper(
     }
 
     private interface CallbackCommand {
-        fun perform(callback: MediaControllerCompat.Callback)
+        fun perform(@NotNull callback: Callback)
     }
 
     private inner class MediaBrowserConnectionCallback : MediaBrowserCompat.ConnectionCallback() {
         override fun onConnected() {
             try {
                 mMediaController = MediaControllerCompat(context, mMediaBrowser?.sessionToken!!)
-                registerCallback(mMediaControllerCallback)
+                mMediaController?.registerCallback(mMediaControllerCallback)
                 mMediaControllerCallback.onMetadataChanged(mMediaController?.metadata)
                 mMediaControllerCallback.onPlaybackStateChanged(mMediaController?.playbackState)
 
@@ -137,21 +143,19 @@ open class MediaBrowserHelper(
         }
     }
 
-    private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
+    private inner class MediaControllerCallback : Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             performOnAllCallbacks(object : CallbackCommand {
-                override fun perform(callback: MediaControllerCompat.Callback) {
-                    if (metadata != null)
-                        callback.onMetadataChanged(metadata)
+                override fun perform(callback: Callback) {
+                    callback.onMetadataChanged(metadata)
                 }
             })
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             performOnAllCallbacks(object : CallbackCommand {
-                override fun perform(callback: MediaControllerCompat.Callback) {
-                    if (state != null)
-                        callback.onPlaybackStateChanged(state)
+                override fun perform(callback: Callback) {
+                    callback.onPlaybackStateChanged(state)
                 }
             })
         }
@@ -159,6 +163,8 @@ open class MediaBrowserHelper(
         override fun onSessionDestroyed() {
             resetState()
             onPlaybackStateChanged(null)
+
+            this@MediaBrowserHelper.onDisconnected()
         }
     }
 }

@@ -61,7 +61,11 @@ class MainActivity : BindingActivity<ActivityMainBinding>() {
         }
     }
 
-    private inner class MediaBrowserConnection(private val context : Context) : MediaBrowserHelper(context, MusicService::class.java){
+    /**
+     * Connect 호출 뒤, onConnected 메서드를 통해서 MediaControllerCompat을 제공받는다.
+
+     */
+    private inner class MediaBrowserConnection(context : Context) : MediaBrowserHelper(context, MusicService::class.java){
         override fun onConnected(mediaController: MediaControllerCompat) {
             binding.seekbarAudio.setMediaController(mediaController)
         }
@@ -79,6 +83,9 @@ class MainActivity : BindingActivity<ActivityMainBinding>() {
         }
     }
 
+    /**
+     * UI를 변경해 주는 Callback Listener
+     */
     private inner class MediaBrowserListener : MediaControllerCompat.Callback(){
         override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
             super.onQueueChanged(queue)
