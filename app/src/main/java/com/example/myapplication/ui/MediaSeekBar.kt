@@ -13,8 +13,8 @@ import androidx.appcompat.widget.AppCompatSeekBar
 
 class MediaSeekBar @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet,
-    defStyle: Int
+    attrs: AttributeSet?= null,
+    defStyle: Int = 0
 ) : AppCompatSeekBar(context, attrs, defStyle) {
     private var mMediaController : MediaControllerCompat? = null
     private var mControllerCallback : ControllerCallback? =null
