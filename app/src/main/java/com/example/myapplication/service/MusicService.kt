@@ -30,12 +30,14 @@ class MusicService : MediaBrowserServiceCompat() {
 
         mSession = MediaSessionCompat(this, "MusicService").apply {
             setCallback(MediaSessionCallback())
-            setFlags(MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS)
+            setFlags(
+                MediaSessionCompat.FLAG_HANDLES_QUEUE_COMMANDS
+            )
             setSessionToken(sessionToken)
+            mMediaNotificationManager = MediaNotificationManager(this@MusicService)
+            mPlayback = MediaPlayerAdapter(this@MusicService, MediaPlayerListener())
         }
 
-        mMediaNotificationManager = MediaNotificationManager(this)
-        mPlayback = MediaPlayerAdapter(this, MediaPlayerListener())
         Log.d(TAG, "onCreate: MusicService creating MediaSession, and MediaNotificationManager")
     }
 
@@ -139,7 +141,7 @@ class MusicService : MediaBrowserServiceCompat() {
 
             when (state.state) {
                 PlaybackStateCompat.STATE_PLAYING -> mServiceManager.moveServiceToStatedState(state)
-                PlaybackStateCompat.STATE_PAUSED -> mServiceManager.updateNotificationForPause(state)
+                PlaybackStateCompat.STATE_PAUSED  -> mServiceManager.updateNotificationForPause(state)
                 PlaybackStateCompat.STATE_STOPPED -> mServiceManager.moveServiceOutOfStartedState(state)
             }
         }
@@ -171,10 +173,13 @@ class MusicService : MediaBrowserServiceCompat() {
                     mPlayback.getCurrentMedia()!!, state, sessionToken!!
                 )
 
-                mMediaNotificationManager.mNotificationManager.notify(MediaNotificationManager.NOTIFICATION_ID,notification)
+                mMediaNotificationManager.mNotificationManager.notify(
+                    MediaNotificationManager.NOTIFICATION_ID,
+                    notification
+                )
             }
 
-            fun moveServiceOutOfStartedState(state : PlaybackStateCompat){
+            fun moveServiceOutOfStartedState(state: PlaybackStateCompat) {
                 stopForeground(true)
                 stopSelf()
                 mServiceInStartedState = false

@@ -28,10 +28,10 @@ import com.example.myapplication.ui.MainActivity
 import org.jetbrains.annotations.NotNull
 
 class MediaNotificationManager(private val service: MusicService) {
-    companion object{
+    companion object {
         val NOTIFICATION_ID = 412
         val TAG = "jms8732"
-        val CHANNEL_ID = "com.example.android.musicplayer.channel"
+        val CHANNEL_ID = "com.example.myapplication.musicplayer.channel"
         val REQUEST_CODE = 501
     }
 
@@ -43,6 +43,7 @@ class MediaNotificationManager(private val service: MusicService) {
             PlaybackStateCompat.ACTION_PLAY
         )
     )
+
     private val mPauseAction: NotificationCompat.Action = NotificationCompat.Action(
         R.drawable.ic_pause_white_24dp,
         service.getString(R.string.label_pause),
@@ -83,7 +84,7 @@ class MediaNotificationManager(private val service: MusicService) {
     fun getNotification(
         metadata: MediaMetadataCompat, @NotNull state: PlaybackStateCompat,
         token: MediaSessionCompat.Token
-    ) : Notification {
+    ): Notification {
         val isPlaying = state.state == PlaybackStateCompat.STATE_PLAYING
         val description = metadata.description
 
@@ -96,14 +97,15 @@ class MediaNotificationManager(private val service: MusicService) {
         isPlaying: Boolean,
         description: MediaDescriptionCompat
     ): NotificationCompat.Builder {
+        Log.d("jms8732", "Action Intent : ${mPlayAction.actionIntent}")
         if (isAndroidOOrHigher()) {
             createChannel()
         }
-        return NotificationCompat.Builder(service,CHANNEL_ID).apply {
+        return NotificationCompat.Builder(service, CHANNEL_ID).apply {
             setStyle(
                 MediaStyle()
                     .setMediaSession(token)
-                    .setShowActionsInCompactView(0,1,2)
+                    .setShowActionsInCompactView(0, 1, 2)
                     .setShowCancelButton(true)
                     .setCancelButtonIntent(
                         MediaButtonReceiver.buildMediaButtonPendingIntent(
@@ -112,23 +114,24 @@ class MediaNotificationManager(private val service: MusicService) {
                         )
                     )
             )
-                .setColor(ContextCompat.getColor(service,R.color.notification_bg))
+                .setColor(ContextCompat.getColor(service, R.color.notification_bg))
                 .setSmallIcon(R.drawable.ic_audiotrack_white_24dp)
                 .setContentIntent(createContentIntent())
                 .setContentTitle(description.title)
                 .setContentText(description.subtitle)
-                .setLargeIcon(MusicLibrary.getAlbumBitmap(service,description.mediaId!!))
-                .setDeleteIntent(MediaButtonReceiver.buildMediaButtonPendingIntent(
-                    service,PlaybackStateCompat.ACTION_STOP
-                ))
+                .setLargeIcon(MusicLibrary.getAlbumBitmap(service, description.mediaId!!))
+                .setDeleteIntent(
+                    MediaButtonReceiver.buildMediaButtonPendingIntent(
+                        service, PlaybackStateCompat.ACTION_STOP
+                    )
+                )
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-
-            if((state.actions.and(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) != 0L){
+            if ((state.actions.and(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)) != 0L) {
                 addAction(mPrevAction)
             }
-            addAction(if(isPlaying) mPauseAction else mPlayAction)
+            addAction(if (isPlaying) mPauseAction else mPlayAction)
 
-            if((state.actions.and(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)) != 0L){
+            if ((state.actions.and(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)) != 0L) {
                 addAction(mNextAction)
             }
         }
@@ -157,10 +160,14 @@ class MediaNotificationManager(private val service: MusicService) {
     private fun isAndroidOOrHigher() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
     @SuppressLint("UnspecifiedImmutableFlag")
-    private fun createContentIntent() = PendingIntent.getActivity(service, REQUEST_CODE,
-        Intent(service, MainActivity::class.java).apply
-        {
-            setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        }, PendingIntent.FLAG_CANCEL_CURRENT
-    )
+    private fun createContentIntent(): PendingIntent {
+        Log.d("jms8732", "createContentIntent: ")
+        return PendingIntent.getActivity(
+            service, REQUEST_CODE,
+            Intent(service, MainActivity::class.java).apply
+            {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }, PendingIntent.FLAG_UPDATE_CURRENT
+        )
+    }
 }
